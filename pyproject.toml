@@ -1,0 +1,12 @@
+[project]
+name = "agni-scripts"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pyagni",
+]
+
+[tool.uv.sources]
+pyagni = { git = "https://github.com/aristatola/pyagni" }

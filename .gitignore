@@ -1,0 +1,51 @@
+tmp
+docs/
+.env
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+*.pyo
+*.pyd
+
+# Build / distribution
+build/
+dist/
+wheels/
+*.egg-info/
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env/
+
+# uv
+.python-version
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+
+# Type checking
+.mypy_cache/
+.pytype/
+.ruff_cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Project-specific
+config.yml
+CLAUDE.md

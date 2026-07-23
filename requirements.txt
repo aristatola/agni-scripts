@@ -1,0 +1,2 @@
+pyagni @ git+https://github.com/aristatola/pyagni.git
+rich
