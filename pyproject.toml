@@ -6,7 +6,8 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "pyagni",
+    "truststore",
 ]
 
 [tool.uv.sources]
-pyagni = { git = "https://github.com/aristatola/pyagni" }
+pyagni = { git = "https://github.com/aristatola/pyagni", tag = "v0.1.3" }

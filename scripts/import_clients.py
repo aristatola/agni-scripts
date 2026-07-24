@@ -25,6 +25,14 @@ Optional flags
 --zone-id N      Zone ID (default: 0).
 --type TYPE      Client group type to use when creating groups (default: "").
 --staging-dir D  Directory for per-group CSV files (default: scripts/ise_to_agni/tmp/).
+--ca-cert PATH   Path to a CA certificate bundle (PEM) for TLS verification.
+--no-verify      Disable TLS certificate verification (not recommended for production).
+
+SSL / TLS
+---------
+You can also set the AGNI_SSL_VERIFY env var instead of using flags:
+    AGNI_SSL_VERIFY=false           Skip certificate verification
+    AGNI_SSL_VERIFY=/path/to/ca.crt Use a custom CA bundle
 """
 
 import argparse
@@ -34,6 +42,9 @@ import os
 import sys
 from collections import defaultdict
 from pathlib import Path
+
+import truststore
+truststore.inject_into_ssl()
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
@@ -164,15 +175,26 @@ def write_group_csvs(groups: dict[str, list[str]], staging_dir: str) -> dict[str
 # ── Main logic ───────────────────────────────────────────────────────────────
 
 
+def _resolve_verify(args: argparse.Namespace):
+    """CLI flags take precedence over the AGNI_SSL_VERIFY env var."""
+    if args.no_verify:
+        return False
+    if args.ca_cert:
+        return args.ca_cert
+    return None
+
+
 async def run_import(
     env: dict, groups: dict[str, list[str]], args: argparse.Namespace
 ) -> None:
+    verify = _resolve_verify(args)
     async with AGNI(
         name="import",
         org_id=env["org_id"],
         api_host=env["host"],
         key_id=env["key_id"],
         key_value=env["key_value"],
+        verify=verify,
     ) as client:
 
         # ── 1. Fetch existing client groups and figure out what to create ─────
@@ -300,6 +322,17 @@ def main() -> None:
     parser.add_argument("--zone-id", type=int, default=0, help="Zone ID (default: 0)")
     parser.add_argument("--type", default="", help="Client group type for new groups (default: '')")
     parser.add_argument("--staging-dir", help="Directory for per-group CSV files (default: scripts/ise_to_agni/tmp/)")
+    ssl_group = parser.add_mutually_exclusive_group()
+    ssl_group.add_argument(
+        "--ca-cert",
+        metavar="PATH",
+        help="Path to a CA certificate bundle (PEM) for TLS verification",
+    )
+    ssl_group.add_argument(
+        "--no-verify",
+        action="store_true",
+        help="Disable TLS certificate verification (not recommended for production)",
+    )
     args = parser.parse_args()
 
     rprint(f"\n[bold]pyagni client import[/bold]  →  [cyan]{args.csv_file}[/cyan]\n")
